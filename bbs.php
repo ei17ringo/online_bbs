@@ -26,7 +26,7 @@ $errors = array();
 //       echo 'hoge2';
 //   }
 
-
+$errors = array();
 //POSTなら保存処理実行
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 	//名前が正しく入力されているかチェック
@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 	//戻り値の配列を受け取る
 	$return_name = fnc_validation($_POST['name'],40,'名前');
 
-	if(isset($return['error'])){
-		$error['name'] = $return_name['error'];
+	if(isset($return_name['error'])){
+		$errors['name'] = $return_name['error'];
 	}else{
 		$name = $return_name['value'];
 	}
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 	$return_comment = fnc_validation($_POST['comment'],200,'ひとこと');
 
 	if(isset($return_comment['error'])){
-		$error['comment'] = $return_comment['error'];
+		$errors['comment'] = $return_comment['error'];
 	}else{
 		$comment = $return_comment['value'];
 	}
@@ -86,16 +86,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 	}
 
 
-	//投稿された内容を取得するSQLを作成して結果を取得
-	$sql = "SELECT * FROM `post` ORDER BY `created_at` DESC";
-
-	$result = mysql_query($sql,$link);
-
-	//フェッチしたものを配列に格納しておく（宿題）
-
-	mysql_close($link);
 
 }
+
+//投稿された内容を取得するSQLを作成して結果を取得
+$sql = "SELECT * FROM `post` ORDER BY `created_at` DESC";
+
+$result = mysql_query($sql,$link);
+
+$posts = array();
+//フェッチしたものを配列に格納しておく（宿題）
+while ($post_each = mysql_fetch_assoc($result)){
+	$posts[] = $post_each;
+}
+
+mysql_close($link);
 
 
 function fnc_validation($check_value,$check_length,$check_item_name){
@@ -104,9 +109,9 @@ function fnc_validation($check_value,$check_length,$check_item_name){
 	if (!isset($check_value) || !strlen($check_value)){
 		$return['error'] = $check_item_name.'を入力して下さい';
 	}else if (strlen($check_value) > $check_length){
-		$return['error'] = $check_item_name.'は40文字以内で入力して下さい。';
+		$return['error'] = $check_item_name.'は'.$check_length.'文字以内で入力して下さい。';
 	}else{
-		$return['value'] = $_POST['name'];
+		$return['value'] = $check_value;
 	}
 
 	return $return;
@@ -121,6 +126,13 @@ function fnc_validation($check_value,$check_length,$check_item_name){
 </head>
 <body>
 	<h1>ひとこと掲示板</h1>
+	<?php if (count($errors) !== 0){ ?>
+	<ul>
+		<?php foreach ($errors as $key => $value) { ?>
+			<li><?php echo $value; ?></li>
+		<?php } ?>
+	</ul>	
+	<?php } ?>
 	<form action="bbs.php" method="post">
 		名前：<input type="text" name="name" /><br />
 		一言：<input type="text" name="comment" size="60" /><br />
@@ -129,27 +141,27 @@ function fnc_validation($check_value,$check_length,$check_item_name){
 
 	<?php
 	//投稿された内容を取得するSQLを作成して結果を取得
-	$sql = "SELECT * FROM `post` ORDER BY `created_at` DESC";
+	// $sql = "SELECT * FROM `post` ORDER BY `created_at` DESC";
 
-	$result = mysql_query($sql,$link);
+	// $result = mysql_query($sql,$link);
 
 	?>
 
 	<?php if($result !== false && mysql_num_rows($result)): ?>
 	<ul>
-		<?php while ($post = mysql_fetch_assoc($result)): ?>
+		<?php foreach ($posts as $post) { ?>
 		<li>
 			<?php echo htmlspecialchars($post['name'],ENT_QUOTES,'UTF-8'); ?>
 			<?php echo htmlspecialchars($post['comment'],ENT_QUOTES,'UTF-8'); ?>
 			- <?php echo htmlspecialchars($post['created_at'],ENT_QUOTES,'UTF-8'); ?>
 		</li>
-		<?php endwhile; ?>
+		<?php } ?>
 	</ul>
 	<?php endif; ?>
 	<?php 
 	//取得結果を開放して接続を閉じる
-	mysql_free_result($result);
-	mysql_close($link);
+	//mysql_free_result($result);
+	//mysql_close($link);
 	?>
 </body>
 </html>
