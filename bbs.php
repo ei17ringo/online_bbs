@@ -118,14 +118,21 @@ function fnc_validation($check_value,$check_length,$check_item_name){
 }
 
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-<title>ひとこと掲示板</title>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ひとこと掲示板</title>
+
+     <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
 </head>
 <body>
 	<h1>ひとこと掲示板</h1>
+	
 	<?php if (count($errors) !== 0){ ?>
 	<ul>
 		<?php foreach ($errors as $key => $value) { ?>
@@ -133,10 +140,21 @@ function fnc_validation($check_value,$check_length,$check_item_name){
 		<?php } ?>
 	</ul>	
 	<?php } ?>
-	<form action="bbs.php" method="post">
-		名前：<input type="text" name="name" /><br />
-		一言：<input type="text" name="comment" size="60" /><br />
-		<input type="submit" name="submit" value="送信" />
+	<form action="bbs.php" method="post"　class="form-horizontal" role="form">
+		<div class="form-group">
+		    <label for="inputName" class="col-sm-2 control-label">名前：</label>
+		    <div class="col-sm-10">
+		      <input type="text" name="name" class="form-control" id="inputName" placeholder="お名前入力して下さい">
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label for="inputComment" class="col-sm-2 control-label">一言：</label>
+		    <div class="col-sm-10">
+		      <input type="text" name="comment" class="form-control" id="inputComment" placeholder="一言入力して下さい">
+		    </div>
+		  </div>
+		<input type="submit" name="submit" class="btn btn-primary"　value="送信" />
+		
 	</form>
 
 	<?php
@@ -146,22 +164,50 @@ function fnc_validation($check_value,$check_length,$check_item_name){
 	// $result = mysql_query($sql,$link);
 
 	?>
-
+	<table class="table table-striped" >
+		<thead>
+		<tr>
+			<th>お名前</th>
+			<th>一言</th>
+			<th>投稿日</th>
+		</tr>
+		</thead>
 	<?php if($result !== false && mysql_num_rows($result)): ?>
-	<ul>
-		<?php foreach ($posts as $post) { ?>
-		<li>
-			<?php echo htmlspecialchars($post['name'],ENT_QUOTES,'UTF-8'); ?>
-			<?php echo htmlspecialchars($post['comment'],ENT_QUOTES,'UTF-8'); ?>
-			- <?php echo htmlspecialchars($post['created_at'],ENT_QUOTES,'UTF-8'); ?>
-		</li>
-		<?php } ?>
-	</ul>
+		<?php 
+		$row_counter = 0;
+		foreach ($posts as $post) { 
+			if ($row_counter % 2 == 1){
+				$class = 'class="warning"';
+			}else{
+				$class = '';
+			}
+
+			?>
+		<tr <?php echo $class ?> >
+			<td>
+				<?php echo htmlspecialchars($post['name'],ENT_QUOTES,'UTF-8'); ?>
+			</td>
+			<td>
+				<?php echo htmlspecialchars($post['comment'],ENT_QUOTES,'UTF-8'); ?>
+			</td>
+			<td>
+				<?php echo htmlspecialchars($post['created_at'],ENT_QUOTES,'UTF-8'); ?>
+			</td>
+		</tr>
+		<?php 
+			$row_counter++;
+			} ?>
 	<?php endif; ?>
+
+	</table>
 	<?php 
 	//取得結果を開放して接続を閉じる
 	//mysql_free_result($result);
 	//mysql_close($link);
 	?>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
 </body>
 </html>
